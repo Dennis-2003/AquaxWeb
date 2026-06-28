@@ -13,8 +13,8 @@ public static class DbInitializer
 
         context.Usuarios.Add(new Usuario
         {
-            Nombre = "Admin",
-            Correo = "admin@aquax.com",
+            Nombre = "Imer sangay",
+            Correo = "imersangay@aquax.com",
             Contrasena = "admin123",
             Rol = "Administrador",
             FechaRegistro = DateTime.Now

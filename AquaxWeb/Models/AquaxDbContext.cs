@@ -1,10 +1,19 @@
 using Microsoft.EntityFrameworkCore;
 
+using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System.Reflection;
+
 namespace AquaxWeb.Models;
 
 public class AquaxDbContext : DbContext
 {
-    public AquaxDbContext(DbContextOptions<AquaxDbContext> options) : base(options) { }
+    private readonly IConfiguration _configuration;
+
+    public AquaxDbContext(DbContextOptions<AquaxDbContext> options, IConfiguration configuration) : base(options) 
+    { 
+        _configuration = configuration;
+    }
 
     public DbSet<Usuario> Usuarios { get; set; }
     public DbSet<Cliente> Clientes { get; set; }
