@@ -1,0 +1,62 @@
+@{
+    ViewData["Title"] = "Registrarse";
+    Layout = "_Layout";
+}
+
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 to-cyan-400 py-10">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4">
+        <div class="text-center mb-6">
+            <img src="~/svg/logo.svg" alt="AQUAX" class="h-12 mx-auto mb-2" />
+            <h2 class="text-xl font-bold mt-2">Crear Cuenta</h2>
+            <p class="text-gray-500 text-sm">Regístrate para dar seguimiento a tus pedidos</p>
+        </div>
+
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-red-600 text-sm mb-3"></div>
+
+            <div class="mb-3">
+                <label class="block text-sm font-medium mb-1">Nombre Completo</label>
+                <input type="text" name="nombre" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" required />
+            </div>
+
+            <div class="mb-3">
+                <label class="block text-sm font-medium mb-1">Teléfono</label>
+                <input type="tel" name="telefono" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" required />
+            </div>
+
+            <div class="mb-3">
+                <label class="block text-sm font-medium mb-1">Dirección</label>
+                <textarea name="direccion" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" rows="2" required></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="block text-sm font-medium mb-1">Tipo de Cliente</label>
+                <select name="tipoCliente" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" required>
+                    <option value="Natural">Natural — Pedidos personales</option>
+                    <option value="Empresa">Empresa — Pedidos al mayoreo</option>
+                </select>
+            </div>
+
+            <hr class="my-4" />
+
+            <div class="mb-3">
+                <label class="block text-sm font-medium mb-1">Correo Electrónico</label>
+                <input type="email" name="correo" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" required />
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-1">Contraseña</label>
+                <input type="password" name="contrasena" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" minlength="4" required />
+            </div>
+
+            <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-lg hover:bg-blue-700 transition">
+                <i class="bi bi-check-circle me-1"></i>Crear Cuenta
+            </button>
+        </form>
+
+        <p class="text-center text-sm text-gray-500 mt-4">
+            ¿Ya tienes cuenta?
+            <a asp-action="Login" class="text-blue-600 font-medium hover:underline">Inicia sesión</a>
+        </p>
+    </div>
+</div>

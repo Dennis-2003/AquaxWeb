@@ -1,0 +1,43 @@
+@model List<Cliente>
+@{
+    ViewData["Title"] = "Clientes";
+}
+
+<div class="flex justify-between items-center mb-4">
+    <h2 class="text-2xl font-bold">Clientes</h2>
+    <a asp-action="Crear" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition"><i class="bi bi-person-plus me-1"></i>Nuevo</a>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm overflow-hidden">
+    <table class="w-full text-sm">
+        <thead class="bg-gray-50 text-gray-600">
+            <tr>
+                <th class="text-left px-4 py-3">Nombre</th>
+                <th class="text-left px-4 py-3">Teléfono</th>
+                <th class="text-left px-4 py-3">Dirección</th>
+                <th class="text-left px-4 py-3">Email</th>
+                <th class="text-left px-4 py-3">Registro</th>
+                <th class="text-left px-4 py-3">Acciones</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y">
+            @foreach (var c in Model)
+            {
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3">@c.Nombre</td>
+                    <td class="px-4 py-3">@c.Telefono</td>
+                    <td class="px-4 py-3">@c.Direccion</td>
+                    <td class="px-4 py-3">@c.Email</td>
+                    <td class="px-4 py-3">@c.FechaRegistro.ToString("dd/MM/yyyy")</td>
+                    <td class="px-4 py-3 flex gap-2">
+                        <a asp-action="Editar" asp-route-id="@c.Id" class="text-blue-600 hover:text-blue-800"><i class="bi bi-pencil"></i></a>
+                        <form method="post" asp-action="Eliminar" class="inline" onsubmit="return confirm('¿Eliminar a @c.Nombre?')">
+                            <input type="hidden" name="id" value="@c.Id" />
+                            <button type="submit" class="text-red-600 hover:text-red-800"><i class="bi bi-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

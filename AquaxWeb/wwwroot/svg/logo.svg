@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 360" width="760" height="360">
+  <g fill="#006877">
+    <path d="M 245 60
+             C 245 60 175 165 175 225
+             C 175 268 208 300 248 300
+             C 288 300 321 268 321 225
+             C 321 165 245 60 245 60 Z" />
+    <path d="M 245 90
+             C 245 90 200 168 200 222
+             C 200 254 221 278 248 278
+             C 252 278 256 277.5 260 276.7
+             C 235 268 215 248 215 222
+             C 215 188 245 90 245 90 Z"
+           fill="#f8f9ff"/>
+  </g>
+  <g fill="#001430" font-family="Montserrat, Arial, Helvetica, sans-serif" font-weight="800">
+    <text x="345" y="220" font-size="92" letter-spacing="2">AQUAX</text>
+  </g>
+  <path d="M 345 248
+           C 400 230 460 270 520 252
+           C 560 240 590 248 610 240"
+        fill="none" stroke="#001430" stroke-width="6" stroke-linecap="round"/>
+</svg>

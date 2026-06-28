@@ -1,0 +1,32 @@
+@{
+    ViewData["Title"] = "Nuevo Producto";
+}
+
+<h2 class="text-2xl font-bold mb-6">Nuevo Producto</h2>
+
+<div class="max-w-lg">
+    <div class="bg-white rounded-xl shadow-sm p-6">
+        <form method="post">
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-1">Nombre</label>
+                <input type="text" name="nombre" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-sm" required />
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-1">Formato</label>
+                <input type="text" name="formato" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="Botella 1L, Garrafón 20L" required />
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-1">Precio</label>
+                <input type="number" name="precio" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-sm" step="0.01" min="0" required />
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-1">Stock</label>
+                <input type="number" name="stock" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-sm" min="0" value="0" />
+            </div>
+            <div class="flex gap-2">
+                <button type="submit" class="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm hover:bg-blue-700 transition"><i class="bi bi-save me-1"></i>Guardar</button>
+                <a asp-action="Index" class="border border-gray-300 px-5 py-2 rounded-lg text-sm hover:bg-gray-50 transition">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>

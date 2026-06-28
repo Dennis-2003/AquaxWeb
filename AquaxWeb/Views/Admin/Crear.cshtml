@@ -1,0 +1,62 @@
+@{
+    ViewData["Title"] = "Nuevo Empleado";
+}
+
+<div class="mb-8 flex items-center justify-between">
+    <div>
+        <h1 class="text-3xl font-headline-md font-bold text-on-surface">Registrar Empleado</h1>
+        <p class="text-on-surface-variant font-body-md mt-1">Crea una nueva cuenta de acceso para un trabajador o administrador.</p>
+    </div>
+</div>
+
+<div class="max-w-xl">
+    <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl shadow-[0px_4px_20px_rgba(0,40,85,0.05)] p-8">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-error text-sm font-bold mb-4 bg-error/10 p-3 rounded-lg border border-error/20"></div>
+            
+            <div class="mb-5">
+                <label class="block text-sm font-bold text-on-surface mb-2 uppercase tracking-wider">Nombre Completo</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">badge</span>
+                    <input type="text" name="nombre" class="w-full bg-surface-container border border-outline-variant rounded-xl pl-10 pr-4 py-3 text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary transition-shadow text-sm" placeholder="Ej. Juan Pérez" required />
+                </div>
+            </div>
+
+            <div class="mb-5">
+                <label class="block text-sm font-bold text-on-surface mb-2 uppercase tracking-wider">Correo Electrónico</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">mail</span>
+                    <input type="email" name="correo" class="w-full bg-surface-container border border-outline-variant rounded-xl pl-10 pr-4 py-3 text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary transition-shadow text-sm" placeholder="juan@aquax.com" required />
+                </div>
+            </div>
+
+            <div class="mb-5">
+                <label class="block text-sm font-bold text-on-surface mb-2 uppercase tracking-wider">Contraseña Temporal</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">lock</span>
+                    <input type="password" name="contrasena" class="w-full bg-surface-container border border-outline-variant rounded-xl pl-10 pr-4 py-3 text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary transition-shadow text-sm" required />
+                </div>
+            </div>
+
+            <div class="mb-8">
+                <label class="block text-sm font-bold text-on-surface mb-2 uppercase tracking-wider">Nivel de Acceso (Rol)</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">admin_panel_settings</span>
+                    <select name="rol" class="w-full bg-surface-container border border-outline-variant rounded-xl pl-10 pr-4 py-3 text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary transition-shadow text-sm cursor-pointer appearance-none">
+                        <option value="Trabajador">Trabajador (Repartidor / Cajero)</option>
+                        <option value="Administrador">Administrador (Acceso Total)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex gap-4">
+                <button type="submit" class="flex-1 bg-primary text-on-primary py-3 rounded-xl font-bold text-sm hover:bg-primary/90 transition shadow-sm flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-[20px]">save</span> Confirmar Registro
+                </button>
+                <a asp-action="Index" class="bg-surface-container-highest text-on-surface py-3 px-6 rounded-xl font-bold text-sm hover:bg-outline-variant/30 transition flex items-center justify-center">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>

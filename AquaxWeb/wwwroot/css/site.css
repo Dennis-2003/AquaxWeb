@@ -1,0 +1,6 @@
+html { font-size: 14px; }
+@media (min-width: 768px) { html { font-size: 16px; } }
+
+.submenu.hidden { display: none; }
+.bi-chevron-down { transition: transform 0.2s; }
+.rotate-180 { transform: rotate(180deg); }

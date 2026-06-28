@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>@ViewData["Title"] - AQUAX Dashboard</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container-highest": "#d3e4fe",
+                        "surface-container": "#e5eeff",
+                        "on-secondary-container": "#005f6d",
+                        "on-primary-fixed-variant": "#284775",
+                        "inverse-surface": "#213145",
+                        "primary-fixed-dim": "#aac7fd",
+                        "background": "#f8f9ff",
+                        "outline-variant": "#c4c6d0",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-tertiary-fixed": "#141d21",
+                        "on-tertiary": "#ffffff",
+                        "tertiary": "#0d151a",
+                        "on-tertiary-fixed-variant": "#3f484d",
+                        "on-primary-fixed": "#001b3d",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed": "#dbe4ea",
+                        "tertiary-container": "#212a2e",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-fixed": "#001f25",
+                        "secondary-container": "#00e0ff",
+                        "on-background": "#0b1c30",
+                        "surface-tint": "#415f8f",
+                        "on-primary": "#ffffff",
+                        "surface": "#f8f9ff",
+                        "on-secondary": "#ffffff",
+                        "primary-container": "#002855",
+                        "inverse-primary": "#aac7fd",
+                        "primary": "#001430",
+                        "outline": "#747780",
+                        "primary-fixed": "#d6e3ff",
+                        "surface-container-low": "#eff4ff",
+                        "secondary": "#006877",
+                        "on-tertiary-container": "#889197",
+                        "surface-variant": "#d3e4fe",
+                        "on-surface": "#0b1c30",
+                        "secondary-fixed-dim": "#00daf8",
+                        "error-container": "#ffdad6",
+                        "surface-container-high": "#dce9ff",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed-variant": "#004e5a",
+                        "error": "#ba1a1a",
+                        "surface-bright": "#f8f9ff",
+                        "secondary-fixed": "#a5eeff",
+                        "surface-dim": "#cbdbf5",
+                        "on-surface-variant": "#43474f"
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        full: "9999px"
+                    },
+                    spacing: {
+                        md: "24px",
+                        gutter: "24px",
+                        xl: "80px",
+                        "margin-mobile": "16px",
+                        lg: "48px",
+                        xs: "4px",
+                        sm: "12px",
+                        base: "8px",
+                        "container-max": "1200px"
+                    },
+                    fontFamily: {
+                        "headline-md": ["Montserrat"],
+                        "label-md": ["Inter"],
+                        "headline-lg": ["Montserrat"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-xl": ["Montserrat"],
+                        "headline-lg-mobile": ["Montserrat"]
+                    },
+                    fontSize: {
+                        "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+                        "label-md": ["14px", { lineHeight: "20px", letterSpacing: "0.05em", fontWeight: "600" }],
+                        "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.01em", fontWeight: "600" }],
+                        "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
+                        "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+                        "label-sm": ["12px", { lineHeight: "16px", fontWeight: "500" }],
+                        "headline-xl": ["48px", { lineHeight: "56px", letterSpacing: "-0.02em", fontWeight: "700" }],
+                        "headline-lg-mobile": ["28px", { lineHeight: "36px", fontWeight: "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .water-accent {
+            border-top: 2px solid #00e0ff;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md min-h-screen">
+    
+    <!-- Mobile Header/Toggle (Added for responsiveness) -->
+    <div class="lg:hidden fixed top-0 left-0 w-full bg-surface shadow-sm h-16 flex items-center justify-between px-4 z-50 border-b border-outline-variant/30">
+        <a class="flex items-center gap-2" asp-controller="Cliente" asp-action="Index">
+            <img src="~/svg/logo.svg" alt="AQUAX" class="h-8" />
+        </a>
+        <button onclick="document.getElementById('mobileSidebar').classList.toggle('-translate-x-full')" class="text-on-surface-variant p-2">
+            <span class="material-symbols-outlined">menu</span>
+        </button>
+    </div>
+
+    <!-- Persistent SideNavBar -->
+    <aside id="mobileSidebar" class="h-screen w-64 fixed left-0 top-0 bg-surface-container-low shadow-[0px_4px_20px_rgba(0,40,85,0.05)] flex flex-col py-md px-sm z-[60] transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
+        
+        <div class="px-sm mb-lg flex justify-between items-center mt-4 lg:mt-0">
+            <div>
+                <a asp-controller="Cliente" asp-action="Index" class="block flex flex-col justify-center gap-1">
+                    <img src="~/svg/logo.svg" alt="AQUAX" class="h-10 object-contain object-left" />
+                    <p class="font-label-sm text-label-sm text-on-surface-variant opacity-70 ml-2">Servicio Premium</p>
+                </a>
+            </div>
+            <button onclick="document.getElementById('mobileSidebar').classList.add('-translate-x-full')" class="lg:hidden text-on-surface-variant p-2 -mr-2">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        @{
+            var currentController = ViewContext.RouteData.Values["Controller"]?.ToString();
+            var currentAction = ViewContext.RouteData.Values["Action"]?.ToString();
+            
+            string GetNavClass(string targetController, string targetAction)
+            {
+                bool isActive = currentController == targetController && currentAction == targetAction;
+                return isActive 
+                    ? "flex items-center gap-sm px-md py-sm rounded-lg transition-colors duration-200 text-secondary font-bold border-r-4 border-secondary bg-surface-container-high transition-transform duration-150 active:scale-95" 
+                    : "flex items-center gap-sm px-md py-sm rounded-lg transition-colors duration-200 text-on-surface-variant hover:text-secondary hover:bg-surface-container-high transition-transform duration-150 active:scale-95";
+            }
+        }
+
+        <nav class="flex-grow space-y-base">
+            <a class="@GetNavClass("Cliente", "Index")" asp-controller="Cliente" asp-action="Index">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span class="font-label-md text-label-md">Mi Panel</span>
+            </a>
+            <a class="@GetNavClass("PedidoCliente", "Crear")" asp-controller="PedidoCliente" asp-action="Crear">
+                <span class="material-symbols-outlined">add_shopping_cart</span>
+                <span class="font-label-md text-label-md">Nuevo Pedido</span>
+            </a>
+            <a class="@GetNavClass("PedidoCliente", "MisPedidos")" asp-controller="PedidoCliente" asp-action="MisPedidos">
+                <span class="material-symbols-outlined">history</span>
+                <span class="font-label-md text-label-md">Mis Pedidos</span>
+            </a>
+            <a class="@GetNavClass("PedidoCliente", "Rastrear")" asp-controller="PedidoCliente" asp-action="Rastrear">
+                <span class="material-symbols-outlined">local_shipping</span>
+                <span class="font-label-md text-label-md">Rastrear</span>
+            </a>
+        </nav>
+        
+        <div class="mt-auto border-t border-outline-variant pt-md space-y-base">
+            <!-- Settings can be added later -->
+            <form asp-controller="Account" asp-action="Logout" method="post" class="w-full">
+                <button type="submit" class="w-full flex items-center gap-sm px-md py-sm rounded-lg transition-colors duration-200 text-error hover:bg-error-container hover:text-on-error-container transition-transform duration-150 active:scale-95">
+                    <span class="material-symbols-outlined">logout</span>
+                    <span class="font-label-md text-label-md">Cerrar Sesión</span>
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- TopNavBar (Shell Component) -->
+    <header class="fixed top-0 lg:left-64 right-0 z-40 bg-surface/80 backdrop-blur-md shadow-[0px_4px_20px_rgba(0,40,85,0.05)] hidden lg:flex items-center justify-between px-lg h-20 border-b border-outline-variant/30">
+        <div class="flex items-center gap-md">
+            <h2 class="font-headline-md text-headline-md text-secondary font-bold">@ViewData["Title"]</h2>
+        </div>
+        <div class="flex items-center gap-lg">
+            <div class="relative hidden xl:block">
+                <input class="bg-surface-container-low border-none rounded-full px-md py-xs pl-10 focus:ring-2 focus:ring-secondary-container w-64 text-label-md" placeholder="Buscar pedidos..." type="text" />
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+            </div>
+            <div class="flex items-center gap-md">
+                <button class="text-on-surface-variant hover:text-secondary transition-colors duration-200">
+                    <span class="material-symbols-outlined">notifications</span>
+                </button>
+                <div class="flex items-center gap-sm border-l border-outline-variant pl-md">
+                    <div class="w-10 h-10 rounded-full bg-secondary text-white flex items-center justify-center font-bold">
+                        @(User.Identity?.Name?.Substring(0,1).ToUpper() ?? "U")
+                    </div>
+                    <span class="font-label-md text-label-md hidden xl:block">@User.Identity?.Name</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="lg:ml-64 pt-16 lg:pt-20 p-4 lg:p-lg min-h-screen">
+        <div class="max-w-container-max mx-auto">
+            @RenderBody()
+        </div>
+    </main>
+
+    <!-- Toast Notifications -->
+    <div id="snackbar-container" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] flex flex-col gap-2 items-center pointer-events-none"></div>
+    @{
+        var msg = TempData["Mensaje"] as string;
+        var tipo = TempData["TipoMensaje"] as string ?? "success";
+    }
+    @if (!string.IsNullOrEmpty(msg))
+    {
+        <div id="snackbar-data" data-message="@msg" data-type="@tipo"></div>
+    }
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+    <script>
+        // Micro-interactions and effects
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('AQUAX Dashboard Initialized');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+@model PedidoViewModel
+@{
+    ViewData["Title"] = "Historial de Pedidos";
+}
+
+<div class="flex justify-between items-center mb-4">
+    <h2 class="text-2xl font-bold">Historial de Pedidos</h2>
+    @if (Model.EsAdmin)
+    {
+        <a asp-action="Exportar" asp-route-fechaDesde="@Model.FechaDesde?.ToString("yyyy-MM-dd")"
+           asp-route-fechaHasta="@Model.FechaHasta?.ToString("yyyy-MM-dd")"
+           asp-route-estado="@Model.EstadoFiltro"
+           class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 transition">
+            <i class="bi bi-download me-1"></i>Exportar CSV
+        </a>
+    }
+</div>
+
+<form method="get" class="flex flex-wrap gap-2 mb-4">
+    @if (Model.EsAdmin)
+    {
+        <input type="date" name="fechaDesde" class="border border-gray-300 rounded-lg px-3 py-2 text-sm" value="@Model.FechaDesde?.ToString("yyyy-MM-dd")" />
+        <input type="date" name="fechaHasta" class="border border-gray-300 rounded-lg px-3 py-2 text-sm" value="@Model.FechaHasta?.ToString("yyyy-MM-dd")" />
+    }
+    <select name="estado" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        <option value="">Todos los estados</option>
+        <option value="Pendiente" selected="@(Model.EstadoFiltro == "Pendiente")">Pendiente</option>
+        <option value="En Ruta" selected="@(Model.EstadoFiltro == "En Ruta")">En Ruta</option>
+        <option value="Entregado" selected="@(Model.EstadoFiltro == "Entregado")">Entregado</option>
+        <option value="Cancelado" selected="@(Model.EstadoFiltro == "Cancelado")">Cancelado</option>
+    </select>
+    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition"><i class="bi bi-funnel me-1"></i>Filtrar</button>
+    <a asp-action="Index" class="border border-gray-300 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 transition">Limpiar</a>
+</form>
+
+<div class="bg-white rounded-xl shadow-sm overflow-hidden">
+    <table class="w-full text-sm">
+        <thead class="bg-gray-50 text-gray-600">
+            <tr>
+                <th class="text-left px-4 py-3">#</th>
+                <th class="text-left px-4 py-3">Cliente</th>
+                <th class="text-left px-4 py-3">Fecha</th>
+                <th class="text-left px-4 py-3">Total</th>
+                <th class="text-left px-4 py-3">Estado</th>
+                <th class="text-left px-4 py-3">Repartidor</th>
+                <th class="text-left px-4 py-3">Acciones</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y">
+            @foreach (var p in Model.Pedidos)
+            {
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3">@p.Id</td>
+                    <td class="px-4 py-3">@p.Cliente?.Nombre</td>
+                    <td class="px-4 py-3">@p.FechaPedido.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td class="px-4 py-3">@p.MontoTotal.ToString("C")</td>
+                    <td class="px-4 py-3">
+                        <span class="px-2 py-0.5 rounded-full text-xs font-semibold text-white
+                            @(p.Estado == "Entregado" ? "bg-green-500" :
+                              p.Estado == "En Ruta" ? "bg-blue-500" :
+                              p.Estado == "Cancelado" ? "bg-red-500" : "bg-yellow-500")">@p.Estado</span>
+                    </td>
+                    <td class="px-4 py-3 text-gray-500">@(p.Usuario?.Nombre ?? "Sin asignar")</td>
+                    <td class="px-4 py-3 flex gap-1">
+                        @if (Model.EsAdmin)
+                        {
+                            @if (p.Usuario == null)
+                            {
+                                <form method="post" asp-action="Asignar" class="flex gap-1">
+                                    <input type="hidden" name="pedidoId" value="@p.Id" />
+                                    <select name="usuarioId" class="border border-gray-300 rounded px-2 py-1 text-xs" required>
+                                        <option value="">Asignar</option>
+                                        @foreach (var t in Model.Trabajadores)
+                                        {
+                                            <option value="@t.Id">@t.Nombre</option>
+                                        }
+                                    </select>
+                                    <button type="submit" class="text-blue-600 hover:text-blue-800" title="Asignar"><i class="bi bi-person-check"></i></button>
+                                </form>
+                            }
+                            else
+                            {
+                                <form method="post" asp-action="Desasignar" class="inline">
+                                    <input type="hidden" name="pedidoId" value="@p.Id" />
+                                    <button type="submit" class="text-gray-500 hover:text-red-600" title="Desasignar"><i class="bi bi-person-x"></i></button>
+                                </form>
+                            }
+                        }
+
+                        @if (p.Estado == "Pendiente")
+                        {
+                            <form method="post" asp-action="CambiarEstado" class="inline">
+                                <input type="hidden" name="pedidoId" value="@p.Id" />
+                                <input type="hidden" name="estado" value="En Ruta" />
+                                <button type="submit" class="text-blue-500 hover:text-blue-700" title="En Ruta"><i class="bi bi-truck"></i></button>
+                            </form>
+                        }
+                        @if (p.Estado == "En Ruta")
+                        {
+                            <form method="post" asp-action="CambiarEstado" class="inline">
+                                <input type="hidden" name="pedidoId" value="@p.Id" />
+                                <input type="hidden" name="estado" value="Entregado" />
+                                <button type="submit" class="text-green-500 hover:text-green-700" title="Entregado"><i class="bi bi-check-circle"></i></button>
+                            </form>
+                        }
+                        @if (p.Estado != "Entregado" && p.Estado != "Cancelado")
+                        {
+                            <form method="post" asp-action="CambiarEstado" class="inline"
+                                  onsubmit="return confirm('¿Cancelar este pedido?')">
+                                <input type="hidden" name="pedidoId" value="@p.Id" />
+                                <input type="hidden" name="estado" value="Cancelado" />
+                                <button type="submit" class="text-red-500 hover:text-red-700" title="Cancelar"><i class="bi bi-x-circle"></i></button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

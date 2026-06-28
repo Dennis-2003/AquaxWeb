@@ -1,0 +1,113 @@
+@model List<Usuario>
+@{
+    ViewData["Title"] = "Gestión de Empleados";
+}
+
+<div class="mb-8 flex items-center justify-between">
+    <div>
+        <h1 class="text-3xl font-headline-md font-bold text-on-surface">Gestión de Empleados</h1>
+        <p class="text-on-surface-variant font-body-md mt-1">Administra los trabajadores, repartidores y usuarios del sistema.</p>
+    </div>
+    <a asp-action="Crear" class="bg-primary text-on-primary px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-primary/90 transition shadow-sm flex items-center gap-2">
+        <span class="material-symbols-outlined text-[18px]">person_add</span> Nuevo Empleado
+    </a>
+</div>
+
+@if (TempData["Mensaje"] != null)
+{
+    <div class="bg-surface-container-lowest border-l-4 border-secondary p-4 mb-6 rounded-lg shadow-sm flex items-center gap-3">
+        <span class="material-symbols-outlined text-secondary">info</span>
+        <p class="text-primary font-body-md">@TempData["Mensaje"]</p>
+    </div>
+}
+
+<div class="bg-surface-container-lowest rounded-2xl shadow-[0px_4px_20px_rgba(0,40,85,0.05)] overflow-hidden border border-outline-variant/30">
+    <table class="w-full text-sm text-left">
+        <thead class="bg-surface-container/50 text-on-surface-variant font-body-md uppercase tracking-wider text-xs">
+            <tr>
+                <th class="px-6 py-4 font-bold rounded-tl-2xl">Empleado</th>
+                <th class="px-6 py-4 font-bold">Correo</th>
+                <th class="px-6 py-4 font-bold">Rol</th>
+                <th class="px-6 py-4 font-bold">Teléfono</th>
+                <th class="px-6 py-4 font-bold">Registro</th>
+                <th class="px-6 py-4 font-bold rounded-tr-2xl text-right">Acciones</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-outline-variant/20">
+            @foreach (var u in Model)
+            {
+                <tr class="hover:bg-surface-container/30 transition-colors">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                                @u.Nombre.Substring(0, 1).ToUpper()
+                            </div>
+                            <span class="font-bold text-on-surface">@u.Nombre</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-on-surface-variant">@u.Correo</td>
+                    <td class="px-6 py-4">
+                        @if (u.Rol == "Administrador")
+                        {
+                            <span class="px-3 py-1 bg-error/10 text-error border border-error/20 rounded-full text-xs font-bold inline-flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[14px]">admin_panel_settings</span> Admin
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-xs font-bold inline-flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[14px]">directions_run</span> @u.Rol
+                            </span>
+                        }
+                    </td>
+                    <td class="px-6 py-4 text-on-surface-variant">@u.Telefono</td>
+                    <td class="px-6 py-4 text-on-surface-variant">@u.FechaRegistro.ToString("dd MMM yyyy")</td>
+                    <td class="px-6 py-4 text-right">
+                        <div class="flex justify-end gap-2">
+                            <a asp-action="Editar" asp-route-id="@u.Id" class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-secondary hover:bg-secondary hover:text-on-secondary transition" title="Editar">
+                                <span class="material-symbols-outlined text-[18px]">edit</span>
+                            </a>
+                            <button onclick="cambiarPw(@u.Id, '@u.Nombre')" class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-tertiary hover:bg-tertiary hover:text-on-tertiary transition" title="Cambiar Contraseña">
+                                <span class="material-symbols-outlined text-[18px]">key</span>
+                            </button>
+                            <form method="post" asp-action="CambiarContrasena" id="pwForm_@u.Id" class="hidden">
+                                <input type="hidden" name="id" value="@u.Id" />
+                                <input type="hidden" name="nuevaContrasena" id="pwInput_@u.Id" />
+                            </form>
+                            @if (u.Rol != "Administrador")
+                            {
+                                <form method="post" asp-action="Eliminar" class="inline" onsubmit="return confirm('¿Seguro que deseas eliminar definitivamente al empleado @u.Nombre?')">
+                                    <input type="hidden" name="id" value="@u.Id" />
+                                    <button type="submit" class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-error hover:bg-error hover:text-on-error transition" title="Eliminar">
+                                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </td>
+                </tr>
+            }
+            @if(!Model.Any())
+            {
+                <tr>
+                    <td colspan="6" class="px-6 py-8 text-center text-on-surface-variant">
+                        <span class="material-symbols-outlined text-4xl mb-2 opacity-50">group_off</span>
+                        <p>No hay empleados registrados.</p>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        function cambiarPw(id, nombre) {
+            const pw = prompt('Ingresa la nueva contraseña para el empleado ' + nombre + ':');
+            if (pw) { 
+                document.getElementById('pwInput_' + id).value = pw; 
+                document.getElementById('pwForm_' + id).submit(); 
+            }
+        }
+    </script>
+}

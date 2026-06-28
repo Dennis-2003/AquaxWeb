@@ -1,0 +1,224 @@
+@{
+    ViewData["Title"] = "Rastrear Pedido";
+    Layout = User.Identity?.IsAuthenticated == true ? "_LayoutDashboard" : "_Layout";
+}
+
+<section class="max-w-4xl mx-auto px-4 py-12">
+    <div class="text-center mb-10">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-surface-container-high rounded-full mb-4 shadow-sm">
+            <span class="material-symbols-outlined text-secondary text-4xl">travel_explore</span>
+        </div>
+        <h2 class="font-headline-xl text-headline-xl text-primary mb-2">Rastrear tu Pedido</h2>
+        <p class="text-on-surface-variant font-body-lg">Sigue el trayecto de tu hidratación en tiempo real.</p>
+    </div>
+
+    @if (Model is List<Pedido> pedidos && ViewBag.Cliente is Cliente cliente)
+    {
+        <div class="bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(0,40,85,0.05)] p-md mb-lg flex items-center justify-between">
+            <div>
+                <p class="font-label-sm text-on-surface-variant">Cliente Registrado</p>
+                <p class="font-headline-md text-primary mt-1">@cliente.Nombre</p>
+                <p class="font-body-md text-secondary">@cliente.Telefono</p>
+            </div>
+            <div class="text-right">
+                <a asp-action="Rastrear" class="bg-surface-container text-on-surface px-4 py-2 rounded-lg font-label-md hover:bg-surface-variant transition-colors flex items-center gap-2">
+                    <span class="material-symbols-outlined" style="font-size:18px">search</span>
+                    Nueva búsqueda
+                </a>
+            </div>
+        </div>
+
+        if (pedidos.Count == 0)
+        {
+            <div class="bg-surface-container-lowest rounded-xl shadow-sm p-12 text-center border border-outline-variant">
+                <span class="material-symbols-outlined text-6xl text-surface-variant mb-4">search_off</span>
+                <h3 class="font-headline-md text-on-surface mb-2">Sin resultados</h3>
+                <p class="text-on-surface-variant font-body-md">No se encontraron pedidos con la información proporcionada.</p>
+            </div>
+        }
+
+        <div class="space-y-lg">
+            @foreach (var p in pedidos)
+            {
+                <div class="bg-surface-container-lowest rounded-2xl shadow-[0px_4px_20px_rgba(0,40,85,0.05)] overflow-hidden border border-surface-variant">
+                    <!-- Cabecera del pedido -->
+                    <div class="bg-surface-container-low p-md flex flex-wrap justify-between items-center border-b border-surface-variant">
+                        <div>
+                            <p class="font-label-sm text-on-surface-variant">Código de Rastreo</p>
+                            <h4 class="font-headline-lg text-primary">@p.CodigoRastreo</h4>
+                        </div>
+                        <div class="text-right mt-4 sm:mt-0">
+                            <p class="font-label-sm text-on-surface-variant">Fecha de Orden</p>
+                            <p class="font-body-md text-on-surface font-bold">@p.FechaPedido.ToString("dd MMM yyyy, hh:mm tt")</p>
+                        </div>
+                    </div>
+
+                    <div class="p-lg grid grid-cols-1 md:grid-cols-2 gap-xl">
+                        <!-- Detalles del Pedido -->
+                        <div>
+                            <h5 class="font-headline-md text-on-surface mb-4">Resumen del Pedido</h5>
+                            <div class="space-y-3 mb-6">
+                                @foreach (var d in p.DetallesPedido)
+                                {
+                                    <div class="flex justify-between items-center text-body-md">
+                                        <span class="text-on-surface-variant">@d.Cantidad x @d.Producto?.Nombre (@d.Producto?.Formato)</span>
+                                        <span class="font-bold text-on-surface">@((d.PrecioUnitario * d.Cantidad).ToString("C"))</span>
+                                    </div>
+                                }
+                            </div>
+                            <div class="flex justify-between items-center border-t border-outline-variant pt-4 mb-6">
+                                <span class="font-headline-md text-on-surface-variant">Total</span>
+                                <span class="font-headline-lg text-primary">@p.MontoTotal.ToString("C")</span>
+                            </div>
+                            @if (p.Usuario != null)
+                            {
+                                <div class="bg-surface-container rounded-lg p-3 flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-secondary rounded-full flex items-center justify-center text-white font-bold">
+                                        @(p.Usuario.Nombre.Substring(0,1).ToUpper())
+                                    </div>
+                                    <div>
+                                        <p class="font-label-sm text-on-surface-variant">Repartidor Asignado</p>
+                                        <p class="font-label-md text-on-surface">@p.Usuario.Nombre</p>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Timeline (Línea de tiempo) -->
+                        <div class="relative bg-surface p-md rounded-xl border border-surface-variant">
+                            <h5 class="font-headline-md text-on-surface mb-6">Estado del Envío</h5>
+                            
+                            @{
+                                int currentStep = p.Estado switch {
+                                    "Cancelado" => -1,
+                                    "Pendiente" => 1,
+                                    "En Ruta" => 2,
+                                    "En Tránsito" => 2,
+                                    "Entregado" => 3,
+                                    _ => 0
+                                };
+                            }
+
+                            @if (currentStep == -1)
+                            {
+                                <div class="text-center py-6">
+                                    <span class="material-symbols-outlined text-error text-6xl mb-2">cancel</span>
+                                    <h4 class="font-headline-lg text-error">Pedido Cancelado</h4>
+                                    <p class="text-on-error-container mt-2">Este pedido no será entregado.</p>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="relative">
+                                    <!-- Línea vertical conectora -->
+                                    <div class="absolute left-6 top-6 bottom-6 w-0.5 bg-outline-variant z-0"></div>
+                                    @if(currentStep >= 2)
+                                    {
+                                        <div class="absolute left-6 top-6 h-1/2 w-0.5 bg-secondary z-0 transition-all duration-1000"></div>
+                                    }
+                                    @if(currentStep == 3)
+                                    {
+                                        <div class="absolute left-6 top-6 bottom-6 w-0.5 bg-secondary z-0 transition-all duration-1000"></div>
+                                    }
+
+                                    <!-- Paso 1: Pendiente -->
+                                    <div class="relative z-10 flex gap-4 mb-8">
+                                        <div class="w-12 h-12 rounded-full flex items-center justify-center shadow-sm @(currentStep >= 1 ? "bg-secondary text-white" : "bg-surface-container-highest text-on-surface-variant")">
+                                            <span class="material-symbols-outlined">inventory_2</span>
+                                        </div>
+                                        <div class="pt-2">
+                                            <p class="font-headline-md @(currentStep >= 1 ? "text-primary" : "text-on-surface-variant") leading-none">Orden Recibida</p>
+                                            <p class="text-sm text-on-surface-variant mt-1">Estamos preparando tu hidratación.</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Paso 2: En Ruta -->
+                                    <div class="relative z-10 flex gap-4 mb-8">
+                                        <div class="w-12 h-12 rounded-full flex items-center justify-center shadow-sm @(currentStep >= 2 ? "bg-secondary text-white" : "bg-surface-container-highest text-outline") @(currentStep == 2 ? "ring-4 ring-secondary-container animate-pulse" : "")">
+                                            <span class="material-symbols-outlined">local_shipping</span>
+                                        </div>
+                                        <div class="pt-2">
+                                            <p class="font-headline-md @(currentStep >= 2 ? "text-primary" : "text-on-surface-variant") leading-none">En Camino</p>
+                                            <p class="text-sm text-on-surface-variant mt-1">El repartidor está en ruta hacia tu dirección.</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Paso 3: Entregado -->
+                                    <div class="relative z-10 flex gap-4">
+                                        <div class="w-12 h-12 rounded-full flex items-center justify-center shadow-sm @(currentStep == 3 ? "bg-primary text-white" : "bg-surface-container-highest text-outline")">
+                                            <span class="material-symbols-outlined">home_pin</span>
+                                        </div>
+                                        <div class="pt-2">
+                                            <p class="font-headline-md @(currentStep == 3 ? "text-primary" : "text-on-surface-variant") leading-none">Entregado</p>
+                                            <p class="text-sm text-on-surface-variant mt-1">Tu pedido llegó a su destino.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <!-- Buscador Glassmorphism -->
+        <div class="max-w-xl mx-auto">
+            <div class="glass-card rounded-2xl p-8 shadow-2xl relative overflow-hidden">
+                <!-- Water decor -->
+                <div class="absolute -right-10 -top-10 opacity-5 pointer-events-none">
+                    <span class="material-symbols-outlined text-[200px]" style="font-variation-settings: 'FILL' 1;">water_drop</span>
+                </div>
+
+                @if (ViewBag.Error is string err)
+                {
+                    <div class="bg-error-container text-on-error-container rounded-lg p-3 mb-6 flex items-start gap-2">
+                        <span class="material-symbols-outlined">error</span>
+                        <p class="font-body-md pt-0.5">@err</p>
+                    </div>
+                }
+
+                <form method="post" class="space-y-6 relative z-10">
+                    <div>
+                        <label class="block font-label-md text-on-surface mb-2 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-secondary">qr_code_scanner</span>
+                            Código de Rastreo
+                        </label>
+                        <input type="text" name="codigoRastreo" class="w-full bg-surface/80 border border-outline-variant rounded-xl px-4 py-3 focus:ring-2 focus:ring-secondary focus:border-secondary outline-none uppercase font-body-lg placeholder:normal-case shadow-sm transition-all"
+                               placeholder="Ej: AQUAX-4F8D2C" maxlength="15" style="text-transform: uppercase;" />
+                        <p class="text-xs text-on-surface-variant mt-2 ml-1">Lo recibiste al finalizar tu compra</p>
+                    </div>
+
+                    <div class="flex items-center gap-4 text-outline-variant">
+                        <hr class="flex-1 border-outline-variant" />
+                        <span class="font-label-sm text-on-surface-variant">O USA TU</span>
+                        <hr class="flex-1 border-outline-variant" />
+                    </div>
+
+                    <div>
+                        <label class="block font-label-md text-on-surface mb-2 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-secondary">call</span>
+                            Teléfono Registrado
+                        </label>
+                        <input type="tel" name="telefono" class="w-full bg-surface/80 border border-outline-variant rounded-xl px-4 py-3 focus:ring-2 focus:ring-secondary focus:border-secondary outline-none font-body-lg shadow-sm transition-all"
+                               placeholder="Ej: 555-123-4567" />
+                        <p class="text-xs text-on-surface-variant mt-2 ml-1">Para ver el historial de todos tus pedidos activos</p>
+                    </div>
+
+                    <button type="submit" class="w-full bg-primary text-white font-headline-md py-4 rounded-xl hover:opacity-90 transition-opacity active:scale-95 shadow-lg flex justify-center items-center gap-2 mt-4">
+                        <span class="material-symbols-outlined">search</span>
+                        Rastrear Ahora
+                    </button>
+                </form>
+            </div>
+            
+            <div class="text-center mt-8">
+                <a asp-controller="PedidoCliente" asp-action="Crear" class="text-secondary font-label-md hover:underline flex items-center justify-center gap-1">
+                    <span class="material-symbols-outlined" style="font-size:18px">shopping_cart</span>
+                    Hacer un nuevo pedido
+                </a>
+            </div>
+        </div>
+    }
+</section>

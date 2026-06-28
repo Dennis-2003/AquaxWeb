@@ -1,0 +1,253 @@
+@model AquaxWeb.Models.DashboardClienteViewModel
+
+@{
+    ViewData["Title"] = "Mi Panel";
+    Layout = "_LayoutDashboard";
+}
+
+<!-- Greeting & Hero Section -->
+<section class="mb-lg mt-4 lg:mt-0">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+        <div>
+            <h3 class="font-headline-xl text-headline-xl text-primary mb-xs">¡Hola, @Model.Cliente.Nombre!</h3>
+            <p class="font-body-lg text-body-lg text-on-surface-variant">Bienvenido de nuevo a tu panel de control AQUAX.</p>
+        </div>
+        <a asp-controller="PedidoCliente" asp-action="Crear" class="bg-primary text-white px-lg py-sm rounded-xl font-headline-md flex items-center justify-center gap-sm hover:opacity-90 transition-opacity shadow-lg active:scale-95">
+            <span class="material-symbols-outlined">add</span>
+            Nuevo Pedido
+        </a>
+    </div>
+</section>
+
+<!-- Quick Summary Bento Grid -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-gutter mb-xl">
+    <!-- Card 1: Productos en camino -->
+    <div class="bg-surface-container-lowest rounded-xl p-md shadow-[0px_4px_20px_rgba(0,40,85,0.05)] water-accent hover:shadow-[0px_8px_30px_rgba(0,40,85,0.12)] transition-shadow duration-300">
+        <div class="flex justify-between items-start mb-sm">
+            <div class="bg-secondary-fixed p-sm rounded-lg">
+                <span class="material-symbols-outlined text-secondary">local_shipping</span>
+            </div>
+            @if (Model.ProductosEnCamino > 0)
+            {
+                <span class="bg-secondary-container text-on-secondary-container px-sm py-1 rounded-full text-label-sm">En Tránsito</span>
+            }
+            else
+            {
+                <span class="bg-surface-container-high text-on-surface-variant px-sm py-1 rounded-full text-label-sm">Entregados</span>
+            }
+        </div>
+        <p class="text-on-surface-variant font-label-md mb-xs">Productos en camino</p>
+        <h4 class="font-headline-lg text-headline-lg text-primary">@(Model.ProductosEnCamino.ToString("D2")) Productos</h4>
+        <p class="text-secondary font-label-sm mt-sm flex items-center gap-1">
+            <span class="material-symbols-outlined text-sm">info</span>
+            @(Model.ProductosEnCamino > 0 ? "Llegada estimada pronto" : "No tienes envíos en curso")
+        </p>
+    </div>
+
+    <!-- Card 2: Próxima entrega -->
+    <div class="bg-surface-container-lowest rounded-xl p-md shadow-[0px_4px_20px_rgba(0,40,85,0.05)] water-accent hover:shadow-[0px_8px_30px_rgba(0,40,85,0.12)] transition-shadow duration-300">
+        <div class="flex justify-between items-start mb-sm">
+            <div class="bg-secondary-fixed p-sm rounded-lg">
+                <span class="material-symbols-outlined text-secondary">calendar_today</span>
+            </div>
+        </div>
+        <p class="text-on-surface-variant font-label-md mb-xs">Próxima entrega</p>
+        @if (Model.ProximaEntrega.HasValue)
+        {
+            <h4 class="font-headline-lg text-headline-lg text-primary">@Model.ProximaEntrega.Value.ToString("MMM dd, yyyy")</h4>
+            <p class="text-on-surface-variant font-label-sm mt-sm">Hora: @Model.ProximaEntrega.Value.ToString("hh:mm tt")</p>
+        }
+        else
+        {
+            <h4 class="font-headline-lg text-headline-lg text-on-surface-variant opacity-50">Sin pedidos</h4>
+            <p class="text-on-surface-variant font-label-sm mt-sm">No tienes entregas programadas</p>
+        }
+    </div>
+
+    <!-- Card 3: Saldo actual -->
+    <div class="bg-primary text-on-primary rounded-xl p-md shadow-[0px_4px_20px_rgba(0,40,85,0.05)] hover:shadow-[0px_8px_30px_rgba(0,40,85,0.12)] transition-shadow duration-300 relative overflow-hidden">
+        <!-- Subtle water pattern decor -->
+        <div class="absolute -right-4 -bottom-4 opacity-10 pointer-events-none">
+            <span class="material-symbols-outlined text-[120px]" style="font-variation-settings: 'FILL' 1;">water_drop</span>
+        </div>
+        <div class="flex justify-between items-start mb-sm relative z-10">
+            <div class="bg-white/10 p-sm rounded-lg">
+                <span class="material-symbols-outlined text-white">account_balance_wallet</span>
+            </div>
+            <button class="text-secondary-fixed text-label-sm font-bold border-b border-secondary-fixed hover:opacity-80 transition-opacity">Recargar</button>
+        </div>
+        <div class="relative z-10">
+            <p class="text-white/70 font-label-md mb-xs">Saldo actual</p>
+            <h4 class="font-headline-lg text-headline-lg text-white">@Model.SaldoMonetario.ToString("C")</h4>
+            <p class="text-secondary-fixed font-label-sm mt-sm">Equivale a @Model.PuntosAqua Puntos Aqua</p>
+        </div>
+    </div>
+</section>
+
+<!-- Visual Content & Recent Activity -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter pb-12">
+    <!-- Recent Activity Table (Left Column) -->
+    <div class="lg:col-span-2 bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(0,40,85,0.05)] overflow-hidden flex flex-col">
+        <div class="p-md border-b border-outline-variant flex justify-between items-center bg-white">
+            <h5 class="font-headline-md text-headline-md text-primary">Actividad Reciente</h5>
+            <a asp-controller="PedidoCliente" asp-action="MisPedidos" class="text-secondary font-label-md hover:underline">Ver todo</a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="bg-surface-container font-label-sm text-on-surface-variant">
+                    <tr>
+                        <th class="px-md py-sm">ID Pedido</th>
+                        <th class="px-md py-sm">Fecha</th>
+                        <th class="px-md py-sm">Estado</th>
+                        <th class="px-md py-sm">Total</th>
+                        <th class="px-md py-sm"></th>
+                    </tr>
+                </thead>
+                <tbody class="font-body-md text-on-surface bg-white">
+                    @if (Model.ActividadReciente.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="5" class="px-md py-8 text-center text-on-surface-variant">No tienes pedidos recientes.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var pedido in Model.ActividadReciente)
+                        {
+                            <tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors group cursor-pointer" onclick="window.location.href='/PedidoCliente/Rastrear?codigoRastreo=@pedido.CodigoRastreo'">
+                                <td class="px-md py-md font-bold text-primary">@pedido.CodigoRastreo</td>
+                                <td class="px-md py-md text-on-surface-variant">@pedido.FechaPedido.ToString("dd MMM, yyyy")</td>
+                                <td class="px-md py-md">
+                                    @if (pedido.Estado == "Entregado")
+                                    {
+                                        <span class="inline-flex items-center gap-1 bg-surface-container-highest text-primary px-sm py-1 rounded-full text-xs font-bold">
+                                            <span class="w-2 h-2 rounded-full bg-primary"></span>
+                                            Entregado
+                                        </span>
+                                    }
+                                    else if (pedido.Estado == "En Ruta" || pedido.Estado == "En Tránsito")
+                                    {
+                                        <span class="inline-flex items-center gap-1 bg-secondary-container text-on-secondary-container px-sm py-1 rounded-full text-xs font-bold">
+                                            <span class="w-2 h-2 rounded-full bg-on-secondary-container animate-pulse"></span>
+                                            @pedido.Estado
+                                        </span>
+                                    }
+                                    else if (pedido.Estado == "Cancelado")
+                                    {
+                                        <span class="inline-flex items-center gap-1 bg-error-container text-on-error-container px-sm py-1 rounded-full text-xs font-bold">
+                                            <span class="w-2 h-2 rounded-full bg-error"></span>
+                                            Cancelado
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="inline-flex items-center gap-1 bg-surface-variant text-on-surface-variant px-sm py-1 rounded-full text-xs font-bold">
+                                            <span class="w-2 h-2 rounded-full bg-outline"></span>
+                                            @pedido.Estado
+                                        </span>
+                                    }
+                                </td>
+                                <td class="px-md py-md font-medium">@pedido.MontoTotal.ToString("C")</td>
+                                <td class="px-md py-md text-right">
+                                    <div class="p-xs inline-flex group-hover:bg-surface-container-highest rounded-full transition-colors text-secondary">
+                                        <span class="material-symbols-outlined">chevron_right</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Right Sidebar Content: Promotion & Tracker -->
+    <div class="space-y-gutter">
+        <!-- Tracking Preview -->
+        <div class="bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(0,40,85,0.05)] p-md h-full bg-white">
+            <h5 class="font-headline-md text-headline-md text-primary mb-md">Rastreo en tiempo real</h5>
+            
+            @if (Model.PedidoActivo != null)
+            {
+                <div class="h-48 rounded-lg overflow-hidden mb-md relative border border-outline-variant">
+                    <div class="bg-cover bg-center w-full h-full grayscale opacity-30" style="background-color: #dce9ff; background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23001430\' fill-opacity=\'0.1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+                    
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="bg-white p-base rounded-full shadow-lg relative cursor-pointer hover:scale-110 transition-transform">
+                            <span class="material-symbols-outlined text-secondary text-4xl" style="font-variation-settings: 'FILL' 1;">local_shipping</span>
+                            <div class="absolute -top-1 -right-1 w-4 h-4 bg-secondary-container border-2 border-white rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="space-y-sm">
+                    <div class="flex gap-sm">
+                        <div class="flex flex-col items-center">
+                            <div class="w-3 h-3 rounded-full bg-secondary"></div>
+                            <div class="w-0.5 h-8 bg-outline-variant"></div>
+                        </div>
+                        <div class="pb-base">
+                            <p class="font-label-md text-label-md text-primary leading-none">Pedido despachado</p>
+                            <p class="text-xs text-on-surface-variant mt-1">Centro de Distribución Norte</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-sm">
+                        <div class="flex flex-col items-center">
+                            <div class="w-3 h-3 rounded-full @(Model.PedidoActivo.Estado == "En Ruta" ? "bg-secondary-container animate-pulse shadow-[0_0_8px_rgba(0,224,255,1)]" : "bg-outline-variant")"></div>
+                        </div>
+                        <div>
+                            <p class="font-label-md text-label-md text-secondary leading-none">En camino a tu ubicación</p>
+                            <p class="text-xs text-on-surface-variant mt-1">
+                                Repartidor: @(Model.PedidoActivo.Usuario?.Nombre ?? "Asignando...")
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <a asp-controller="PedidoCliente" asp-action="Rastrear" asp-route-codigoRastreo="@Model.PedidoActivo.CodigoRastreo" class="mt-6 w-full block text-center border border-outline-variant text-on-surface-variant py-2 rounded-lg font-label-md hover:bg-surface-container-low transition-colors">
+                    Ver rastreo completo
+                </a>
+            }
+            else
+            {
+                <div class="text-center py-12">
+                    <span class="material-symbols-outlined text-outline-variant text-5xl mb-2">package</span>
+                    <p class="text-on-surface-variant font-body-md">No tienes pedidos en curso.</p>
+                    <a asp-controller="PedidoCliente" asp-action="Crear" class="text-secondary font-label-md hover:underline mt-2 inline-block">Hacer un pedido ahora</a>
+                </div>
+            }
+        </div>
+        
+        <!-- CTA / Promotion Card -->
+        <div class="bg-secondary-container/20 rounded-xl border border-secondary-container p-md relative overflow-hidden group cursor-pointer hover:shadow-lg transition-all">
+            <div class="relative z-10">
+                <span class="text-[40px] mb-sm block group-hover:scale-110 transition-transform origin-bottom-left">💧</span>
+                <h6 class="font-headline-md text-headline-md text-on-secondary-container mb-xs">¿Necesitas ayuda?</h6>
+                <p class="font-body-md text-body-md text-on-secondary-container opacity-80 mb-md">Nuestro equipo de soporte está disponible 24/7 para atenderte.</p>
+                <button class="bg-on-secondary-container text-white px-md py-xs rounded-full font-label-md hover:bg-secondary transition-colors group-active:scale-95">
+                    Hablar con soporte
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Micro-interactions and effects for cards
+        document.addEventListener('DOMContentLoaded', () => {
+            const summaryCards = document.querySelectorAll('section.grid > div');
+            summaryCards.forEach(card => {
+                card.addEventListener('mousedown', () => {
+                    card.classList.add('scale-[0.98]');
+                });
+                card.addEventListener('mouseup', () => {
+                    card.classList.remove('scale-[0.98]');
+                });
+                card.addEventListener('mouseleave', () => {
+                    card.classList.remove('scale-[0.98]');
+                });
+            });
+        });
+    </script>
+}

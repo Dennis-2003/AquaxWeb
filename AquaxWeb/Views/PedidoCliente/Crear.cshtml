@@ -1,0 +1,378 @@
+@{
+    ViewData["Title"] = "Haz tu Pedido";
+    Layout = "_LayoutDashboard";
+    var productos = ViewBag.Productos as List<Producto>;
+}
+
+<div class="max-w-[1200px] mx-auto px-4 pt-8 pb-36">
+
+    <!-- Hero Selection Title -->
+    <div class="text-center mb-12">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-primary-container/10 rounded-full mb-2">
+            <span class="material-symbols-outlined text-primary text-3xl">shopping_basket</span>
+        </div>
+        <h1 class="font-headline-xl text-headline-xl text-primary mb-2">Haz tu Pedido</h1>
+        <p class="text-on-surface-variant font-body-lg max-w-lg mx-auto">Elige tus productos de hidratación premium y completa el envío en pocos pasos.</p>
+    </div>
+
+    @if (TempData["CodigoRastreo"] is string codigo)
+    {
+        <div class="max-w-2xl mx-auto mb-6">
+            <div class="bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(0,40,85,0.05)] border-l-4 border-secondary p-5 flex items-start gap-4">
+                <span class="material-symbols-outlined text-secondary" style="font-size:32px">check_circle</span>
+                <div class="flex-1">
+                    <p class="font-headline-md text-lg text-primary">¡Pedido registrado con éxito!</p>
+                    <p class="text-on-surface-variant font-body-md mt-1">
+                        Tu código de rastreo:
+                        <strong class="text-base tracking-wider text-secondary">@codigo</strong>
+                    </p>
+                    <p class="text-on-surface-variant font-body-md mt-1">
+                        <a asp-action="Rastrear" asp-route-codigoRastreo="@codigo" class="text-secondary font-bold underline hover:no-underline flex items-center gap-1 inline-flex">
+                            <span class="material-symbols-outlined" style="font-size:18px">travel_explore</span>
+                            Da seguimiento aquí
+                        </a>
+                        o guárdalo para consultar después.
+                    </p>
+                </div>
+            </div>
+        </div>
+    }
+
+    <form method="post" id="orderForm">
+        <div asp-validation-summary="ModelOnly" class="text-error text-sm mb-4 max-w-3xl mx-auto"></div>
+
+        <!-- Stepper -->
+        <div class="flex items-center justify-center gap-4 mb-12">
+            <div class="flex items-center gap-2">
+                <span id="step1Dot" class="w-8 h-8 rounded-full bg-secondary text-on-primary flex items-center justify-center font-bold text-label-md">1</span>
+                <span id="step1Label" class="font-headline-md text-secondary text-body-md font-semibold">Productos</span>
+            </div>
+            <div class="w-16 h-[2px] bg-outline-variant/30 relative">
+                <div id="stepLine" class="absolute top-0 left-0 h-full bg-secondary transition-all duration-500" style="width:0%"></div>
+            </div>
+            <div id="step2Group" class="flex items-center gap-2 opacity-40">
+                <span id="step2Dot" class="w-8 h-8 rounded-full bg-outline-variant text-on-surface flex items-center justify-center font-bold text-label-md">2</span>
+                <span id="step2Label" class="font-body-md text-on-surface">Envío</span>
+            </div>
+        </div>
+
+        <!-- STEP 1: Productos -->
+        <div id="stepProducts">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                @if (productos != null)
+                {
+                    foreach (var p in productos)
+                    {
+                        <div class="glass-card rounded-xl p-6 flex flex-col items-center product-hover-effect border-t-2 border-secondary-container">
+                            <div class="w-full aspect-square relative mb-4 rounded-lg overflow-hidden bg-surface-container-low flex items-center justify-center">
+                                @if (p.Nombre?.Contains("20L") == true)
+                                {
+                                    <img class="h-4/5 object-contain" src="~/svg/product-garrafon-20l.svg" alt="@p.Nombre" />
+                                }
+                                else if (p.Nombre?.Contains("1L") == true)
+                                {
+                                    <img class="h-4/5 object-contain" src="~/svg/product-botella-1l.svg" alt="@p.Nombre" />
+                                }
+                                else
+                                {
+                                    <img class="h-4/5 object-contain" src="~/svg/product-garrafon-10l.svg" alt="@p.Nombre" />
+                                }
+                            </div>
+                            <div class="text-center w-full mb-4">
+                                <span class="inline-block px-2 py-0.5 bg-tertiary-fixed text-on-primary-fixed-variant rounded-full text-label-sm mb-2">Purificada</span>
+                                <h3 class="font-headline-md text-primary mb-1">@p.Nombre</h3>
+                                <p class="text-on-surface-variant font-body-md">@p.Formato</p>
+                            </div>
+                            <div class="w-full flex items-center justify-between mb-2">
+                                <span class="font-headline-md text-secondary font-bold">S/ @p.Precio.ToString("0.00").Replace('.', ',')</span>
+                                <div class="flex items-center gap-2 bg-surface-container-highest px-2 py-1 rounded-full">
+                                    <button type="button" class="w-8 h-8 flex items-center justify-center rounded-full bg-white text-primary hover:bg-secondary-fixed transition-colors" onclick="decrement('cantidad_@p.Id')">
+                                        <span class="material-symbols-outlined">remove</span>
+                                    </button>
+                                    <input type="number" id="cantidad_@p.Id" name="cantidades[@p.Id]" value="0" min="0" max="99" class="w-8 text-center bg-transparent border-none focus:ring-0 font-bold text-primary" onchange="updateCart()" />
+                                    <button type="button" class="w-8 h-8 flex items-center justify-center rounded-full bg-white text-primary hover:bg-secondary-fixed transition-colors" onclick="increment('cantidad_@p.Id')">
+                                        <span class="material-symbols-outlined">add</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+
+        <!-- STEP 2: Datos de envío -->
+        <div id="stepShipping" class="hidden">
+            <div class="max-w-2xl mx-auto">
+                <div class="glass-card rounded-xl p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1 text-on-surface">Nombre Completo</label>
+                            <input type="text" name="nombre" id="fieldNombre" class="w-full border border-outline-variant rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-secondary outline-none bg-surface" required />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1 text-on-surface">Teléfono</label>
+                            <input type="tel" name="telefono" id="fieldTelefono" class="w-full border border-outline-variant rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-secondary outline-none bg-surface" required />
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium mb-1 text-on-surface">Dirección</label>
+                            <textarea name="direccion" id="fieldDireccion" class="w-full border border-outline-variant rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-secondary outline-none bg-surface" rows="2" required></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1 text-on-surface">Zona</label>
+                            <select name="zona" id="fieldZona" class="w-full border border-outline-variant rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-secondary outline-none bg-surface" required>
+                                <option value="">Selecciona una zona...</option>
+                                <option value="Centro">Centro</option>
+                                <option value="Norte">Norte</option>
+                                <option value="Sur">Sur</option>
+                                <option value="Oriente">Oriente</option>
+                                <option value="Poniente">Poniente</option>
+                                <option value="Municipios">Municipios</option>
+                                <option value="Otra">Otra</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="bg-surface-container-low rounded-lg p-4 mb-4">
+                        <h4 class="font-bold text-sm mb-2 text-on-surface">Resumen de tu pedido</h4>
+                        <div id="orderSummary" class="space-y-1 text-sm text-on-surface-variant"></div>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <button type="button" onclick="goToStep1()" class="w-1/3 border border-outline-variant text-on-surface-variant font-semibold py-2.5 rounded-lg hover:bg-surface-container-high transition text-sm flex items-center justify-center gap-1">
+                            <span class="material-symbols-outlined">arrow_back</span>Ajustar
+                        </button>
+                        <button type="submit" class="flex-1 bg-primary text-on-primary font-semibold py-2.5 rounded-lg hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-1">
+                            <span class="material-symbols-outlined">shopping_cart_checkout</span>Solicitar Pedido
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Summary Bar (fixed bottom) -->
+<section id="cartBar" class="fixed bottom-0 left-0 w-full bg-surface/90 backdrop-blur-xl shadow-[0px_-4px_30px_rgba(0,40,85,0.08)] z-50 py-4 transition-all duration-300 opacity-0 pointer-events-none translate-y-4">
+    <div class="max-w-[1200px] mx-auto px-4 flex items-center justify-between">
+        <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-on-surface-variant">category</span>
+                <span class="text-on-surface-variant font-body-md">Productos: <strong class="text-primary font-bold" id="cartCount">0</strong></span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-secondary">account_balance_wallet</span>
+                <span class="text-on-surface-variant font-body-md">Total: <strong class="text-secondary font-bold" id="cartTotalLabel"></strong></span>
+            </div>
+        </div>
+        <button type="button" onclick="goToStep2()" id="continueBtn" disabled class="bg-primary text-on-primary px-6 py-2.5 rounded-lg font-headline-md flex items-center gap-2 hover:shadow-lg active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+            Continuar
+            <span class="material-symbols-outlined">arrow_forward</span>
+        </button>
+    </div>
+</section>
+
+<!-- Exit Modal -->
+<div id="exitModal" class="fixed inset-0 z-[100] bg-black/50 flex items-center justify-center hidden">
+    <div class="bg-surface rounded-2xl shadow-2xl p-6 max-w-sm mx-4">
+        <div class="text-center">
+            <span class="material-symbols-outlined text-5xl text-error">warning</span>
+            <h3 class="font-headline-md text-headline-md text-on-surface mt-2">¿Seguro que quieres salir?</h3>
+            <p class="text-on-surface-variant font-body-md mt-1">Tienes productos seleccionados. Si sales ahora, perderás tu progreso.</p>
+            <div class="mt-4 space-y-2">
+                <button onclick="closeExitModal()" class="w-full bg-primary text-on-primary font-semibold py-2.5 rounded-lg hover:opacity-90 transition">
+                    Seguir comprando
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const productos = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(productos?.Select(p => new { p.Id, p.Nombre, p.Precio, p.Formato })));
+
+    let savedForm = { nombre: '', telefono: '', direccion: '', zona: '' };
+    let allowUnload = false;
+
+    function saveFormState() {
+        savedForm.nombre = document.getElementById('fieldNombre')?.value || '';
+        savedForm.telefono = document.getElementById('fieldTelefono')?.value || '';
+        savedForm.direccion = document.getElementById('fieldDireccion')?.value || '';
+        savedForm.zona = document.getElementById('fieldZona')?.value || '';
+    }
+
+    function restoreFormState() {
+        if (document.getElementById('fieldNombre')) document.getElementById('fieldNombre').value = savedForm.nombre;
+        if (document.getElementById('fieldTelefono')) document.getElementById('fieldTelefono').value = savedForm.telefono;
+        if (document.getElementById('fieldDireccion')) document.getElementById('fieldDireccion').value = savedForm.direccion;
+        if (document.getElementById('fieldZona')) document.getElementById('fieldZona').value = savedForm.zona;
+    }
+
+    function saveCartToLocal() {
+        const cart = {};
+        document.querySelectorAll('input[name^="cantidades"]').forEach(input => {
+            const qty = parseInt(input.value) || 0;
+            if (qty > 0) {
+                const id = input.name.match(/\d+/)[0];
+                cart[id] = qty;
+            }
+        });
+        localStorage.setItem('aquax_cart', JSON.stringify(cart));
+        saveFormState();
+        localStorage.setItem('aquax_form', JSON.stringify(savedForm));
+    }
+
+    function loadCartFromLocal() {
+        const savedCart = localStorage.getItem('aquax_cart');
+        if (savedCart) {
+            try {
+                const cart = JSON.parse(savedCart);
+                for (const id in cart) {
+                    const input = document.getElementById('cantidad_' + id);
+                    if (input) input.value = cart[id];
+                }
+            } catch (e) {}
+        }
+        const savedFormStr = localStorage.getItem('aquax_form');
+        if (savedFormStr) {
+            try {
+                savedForm = JSON.parse(savedFormStr);
+                restoreFormState();
+            } catch (e) {}
+        }
+        updateCart();
+    }
+
+    function increment(id) {
+        const input = document.getElementById(id);
+        const val = parseInt(input.value) || 0;
+        if (val < 99) { input.value = val + 1; updateCart(); }
+    }
+    
+    function decrement(id) {
+        const input = document.getElementById(id);
+        const val = parseInt(input.value) || 0;
+        if (val > 0) { input.value = val - 1; updateCart(); }
+    }
+
+    function fmt(val) {
+        return val.toFixed(2).replace('.', ',');
+    }
+
+    function getTotalItems() {
+        let total = 0;
+        document.querySelectorAll('input[name^="cantidades"]').forEach(i => total += parseInt(i.value) || 0);
+        return total;
+    }
+
+    function getCartTotal() {
+        let total = 0;
+        document.querySelectorAll('input[name^="cantidades"]').forEach(input => {
+            const qty = parseInt(input.value) || 0;
+            if (qty > 0) {
+                const id = input.name.match(/\d+/)[0];
+                const prod = productos.find(p => p.Id == id);
+                if (prod) total += prod.Precio * qty;
+            }
+        });
+        return total;
+    }
+
+    function updateCart() {
+        const total = getTotalItems();
+        const cartTotal = getCartTotal();
+        const btn = document.getElementById('continueBtn');
+        const bar = document.getElementById('cartBar');
+        const banner = document.getElementById('warningBanner');
+
+        document.getElementById('cartCount').textContent = total;
+        document.getElementById('cartTotalLabel').textContent = total > 0 ? `S/ ${fmt(cartTotal)}` : '';
+
+        if (total > 0) {
+            btn.disabled = false;
+            bar.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+            bar.classList.add('opacity-100', 'pointer-events-auto', 'translate-y-0');
+        } else {
+            btn.disabled = true;
+            bar.classList.remove('opacity-100', 'pointer-events-auto', 'translate-y-0');
+            bar.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+        }
+    }
+
+    function goToStep2() {
+        document.getElementById('stepProducts').classList.add('hidden');
+        document.getElementById('stepShipping').classList.remove('hidden');
+        document.getElementById('cartBar').classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+        document.getElementById('cartBar').classList.remove('opacity-100', 'pointer-events-auto', 'translate-y-0');
+        document.getElementById('warningBanner')?.classList.add('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        document.getElementById('step1Dot').classList.remove('bg-secondary');
+        document.getElementById('step1Dot').classList.add('bg-secondary');
+        document.getElementById('step1Label').classList.add('text-secondary');
+        document.getElementById('step2Group').classList.remove('opacity-40');
+        document.getElementById('step2Dot').classList.remove('bg-outline-variant', 'text-on-surface');
+        document.getElementById('step2Dot').classList.add('bg-secondary', 'text-on-primary');
+        document.getElementById('stepLine').style.width = '100%';
+
+        restoreFormState();
+        buildSummary();
+    }
+
+    function goToStep1() {
+        saveFormState();
+        document.getElementById('stepShipping').classList.add('hidden');
+        document.getElementById('stepProducts').classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        document.getElementById('step1Dot').classList.add('bg-secondary');
+        document.getElementById('step1Label').classList.add('text-secondary');
+        document.getElementById('step2Group').classList.add('opacity-40');
+        document.getElementById('step2Dot').classList.remove('bg-secondary', 'text-on-primary');
+        document.getElementById('step2Dot').classList.add('bg-outline-variant', 'text-on-surface');
+        document.getElementById('stepLine').style.width = '0%';
+
+        updateCart();
+    }
+
+    function buildSummary() {
+        const summary = document.getElementById('orderSummary');
+        summary.innerHTML = '';
+        let total = 0;
+        document.querySelectorAll('input[name^="cantidades"]').forEach(input => {
+            const qty = parseInt(input.value) || 0;
+            if (qty > 0) {
+                const id = input.name.match(/\d+/)[0];
+                const prod = productos.find(p => p.Id == id);
+                if (prod) {
+                    const sub = prod.Precio * qty;
+                    total += sub;
+                    summary.innerHTML += `<div class="flex justify-between"><span>${qty} x ${prod.Nombre} (${prod.Formato})</span><span>S/ ${fmt(sub)}</span></div>`;
+                }
+            }
+        });
+        summary.innerHTML += `<hr class="my-1 border-outline-variant" /><div class="flex justify-between font-bold text-base text-on-surface"><span>Total</span><span>S/ ${fmt(total)}</span></div>`;
+    }
+
+    document.querySelectorAll('a:not([href^="#"]):not([onclick])').forEach(a => {
+        a.addEventListener('click', function(e) {
+            if (getTotalItems() > 0 && !document.getElementById('stepShipping').classList.contains('hidden') === false) {
+                e.preventDefault();
+                document.getElementById('exitModal').classList.remove('hidden');
+            }
+        });
+    });
+
+    function closeExitModal() {
+        document.getElementById('exitModal').classList.add('hidden');
+    }
+
+    window.addEventListener('beforeunload', function(e) {
+        if (getTotalItems() > 0) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+
+    updateCart();
+</script>

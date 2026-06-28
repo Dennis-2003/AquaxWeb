@@ -1,0 +1,111 @@
+@model IEnumerable<AquaxWeb.Controllers.ReporteCajaViewModel>
+@{
+    ViewData["Title"] = "Corte de Caja Diario";
+}
+
+<div class="mb-8 flex items-center justify-between">
+    <div>
+        <h1 class="text-3xl font-headline-md font-bold text-on-surface">Corte de Caja Diaria</h1>
+        <p class="text-on-surface-variant font-body-md mt-1">Liquidación y conciliación de rutas de hoy (@DateTime.Today.ToString("dd MMM yyyy")).</p>
+    </div>
+</div>
+
+<!-- Resumen Global -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-primary text-on-primary rounded-2xl p-6 shadow-md relative overflow-hidden flex flex-col justify-center">
+        <span class="material-symbols-outlined absolute right-[-10px] bottom-[-10px] text-[100px] opacity-20 pointer-events-none">payments</span>
+        <p class="font-body-md opacity-90 relative z-10">Gran Total</p>
+        <p class="text-3xl lg:text-4xl font-headline-md font-bold mt-2 relative z-10 truncate">S/ @ViewBag.GranTotal?.ToString("0.00")</p>
+    </div>
+    
+    <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 shadow-sm">
+        <div class="flex justify-between items-start">
+            <p class="font-body-md text-on-surface-variant">Efectivo Físico</p>
+            <span class="material-symbols-outlined text-secondary">local_atm</span>
+        </div>
+        <p class="text-2xl font-headline-md font-bold text-on-surface mt-2">S/ @ViewBag.TotalEfectivo?.ToString("0.00")</p>
+    </div>
+
+    <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 shadow-sm">
+        <div class="flex justify-between items-start">
+            <p class="font-body-md text-on-surface-variant">Transferencias/Yape</p>
+            <span class="material-symbols-outlined text-tertiary">phone_iphone</span>
+        </div>
+        <p class="text-2xl font-headline-md font-bold text-on-surface mt-2">S/ @ViewBag.TotalTransferencias?.ToString("0.00")</p>
+    </div>
+
+    <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 shadow-sm">
+        <div class="flex justify-between items-start">
+            <p class="font-body-md text-on-surface-variant">Pedidos Completados</p>
+            <span class="material-symbols-outlined text-primary">done_all</span>
+        </div>
+        <p class="text-2xl font-headline-md font-bold text-on-surface mt-2">@ViewBag.TotalPedidos</p>
+    </div>
+</div>
+
+<!-- Desglose por Repartidor -->
+<h2 class="text-xl font-headline-sm font-bold text-on-surface mb-4">Liquidación por Repartidor</h2>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    @foreach(var reporte in Model)
+    {
+        <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 shadow-sm">
+            <div class="flex justify-between items-center mb-4 pb-4 border-b border-outline-variant/20">
+                <div class="flex items-center gap-3 overflow-hidden">
+                    <div class="w-10 h-10 shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                        @reporte.RepartidorNombre.Substring(0, 1).ToUpper()
+                    </div>
+                    <div class="min-w-0">
+                        <h3 class="font-bold text-on-surface truncate" title="@reporte.RepartidorNombre">@reporte.RepartidorNombre</h3>
+                        <p class="text-xs text-on-surface-variant">@reporte.PedidosEntregados pedidos hoy</p>
+                    </div>
+                </div>
+                <div class="text-right shrink-0 ml-3">
+                    <p class="text-xs text-on-surface-variant">Total Recaudado</p>
+                    <p class="text-xl font-bold text-primary">S/ @reporte.TotalRecaudado.ToString("0.00")</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-surface-container rounded-xl p-3">
+                    <p class="text-xs text-on-surface-variant uppercase tracking-wider font-bold mb-1">Dinero a Rendir</p>
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="text-on-surface">Efectivo:</span>
+                        <span class="font-bold text-secondary">S/ @reporte.TotalEfectivo.ToString("0.00")</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-on-surface">Digital:</span>
+                        <span class="font-bold text-tertiary">S/ @reporte.TotalTransferencias.ToString("0.00")</span>
+                    </div>
+                </div>
+
+                <div class="bg-surface-container rounded-xl p-3">
+                    <p class="text-xs text-on-surface-variant uppercase tracking-wider font-bold mb-1">Corte de Envases</p>
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="text-on-surface">Entregados:</span>
+                        <span class="font-bold text-error">@reporte.EnvasesEntregados</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-on-surface">Recogidos:</span>
+                        <span class="font-bold text-[#1b5e20]">@reporte.EnvasesRecibidos</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4 pt-4 border-t border-outline-variant/20 flex gap-2">
+                <button class="flex-1 bg-secondary text-on-secondary py-2 rounded-lg text-sm font-bold flex justify-center items-center gap-2 hover:bg-secondary/90 transition">
+                    <span class="material-symbols-outlined text-[18px]">verified</span>
+                    Confirmar Arqueo
+                </button>
+            </div>
+        </div>
+    }
+    
+    @if(!Model.Any())
+    {
+        <div class="col-span-2 text-center py-12 bg-surface-container-lowest rounded-2xl border border-outline-variant/30">
+            <span class="material-symbols-outlined text-4xl text-on-surface-variant mb-2 opacity-50">receipt_long</span>
+            <p class="text-on-surface-variant">No hay entregas registradas para el día de hoy.</p>
+        </div>
+    }
+</div>

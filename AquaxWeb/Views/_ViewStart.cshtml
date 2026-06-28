@@ -1,0 +1,10 @@
+﻿@{
+    if (Context.User.Identity?.IsAuthenticated == true)
+    {
+        Layout = "_DashboardLayout";
+    }
+    else
+    {
+        Layout = "_Layout";
+    }
+}

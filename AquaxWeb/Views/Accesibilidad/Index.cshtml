@@ -1,0 +1,77 @@
+@model HistorialAccesibilidad
+@{
+    ViewData["Title"] = "Accesibilidad";
+}
+
+<h2 class="text-2xl font-bold mb-6">Accesibilidad</h2>
+
+<div class="max-w-lg">
+    <div class="bg-white rounded-xl shadow-sm p-6 space-y-5">
+        <label class="flex items-center gap-3 cursor-pointer">
+            <input type="checkbox" id="narradorActivado" checked="@Model.NarradorActivado" onchange="guardar()"
+                   class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500" />
+            <div>
+                <span class="font-medium"><i class="bi bi-volume-up me-1"></i> Narrador de Pantalla</span>
+                <p class="text-gray-500 text-xs">Lectura en voz alta de la interfaz.</p>
+            </div>
+        </label>
+
+        <label class="flex items-center gap-3 cursor-pointer">
+            <input type="checkbox" id="modoOscuro" checked="@Model.ModoOscuro" onchange="guardar()"
+                   class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500" />
+            <div>
+                <span class="font-medium"><i class="bi bi-moon me-1"></i> Modo Oscuro</span>
+                <p class="text-gray-500 text-xs">Contraste para entornos de baja luz.</p>
+            </div>
+        </label>
+
+        <div>
+            <label class="font-medium block mb-2"><i class="bi bi-zoom-in me-1"></i> Zoom: <strong id="zoomLabel">@Model.NivelZoom%</strong></label>
+            <input type="range" id="nivelZoom" min="100" max="200" step="10" value="@Model.NivelZoom"
+                   oninput="document.getElementById('zoomLabel').textContent=this.value+'%'; document.body.style.zoom=this.value+'%'"
+                   onchange="guardar()" class="w-full accent-blue-600" />
+        </div>
+
+        <div>
+            <label class="font-medium block mb-2" for="filtroColor"><i class="bi bi-palette me-1"></i> Filtro de Color</label>
+            <select id="filtroColor" onchange="guardar()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                <option value="">Ninguno</option>
+                <option value="protanopia" selected="@(Model.FiltroColor == "protanopia")">Protanopia (rojo-verde)</option>
+                <option value="deuteranopia" selected="@(Model.FiltroColor == "deuteranopia")">Deuteranopia (verde-rojo)</option>
+                <option value="tritanopia" selected="@(Model.FiltroColor == "tritanopia")">Tritanopia (azul-amarillo)</option>
+                <option value="grayscale" selected="@(Model.FiltroColor == "grayscale")">Escala de grises</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function guardar() {
+            fetch('@Url.Action("Guardar", "Accesibilidad")', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    narradorActivado: document.getElementById('narradorActivado').checked,
+                    modoOscuro: document.getElementById('modoOscuro').checked,
+                    nivelZoom: parseInt(document.getElementById('nivelZoom').value),
+                    filtroColor: document.getElementById('filtroColor').value
+                })
+            });
+        }
+
+        document.getElementById('modoOscuro').addEventListener('change', function () {
+            document.documentElement.setAttribute('data-bs-theme', this.checked ? 'dark' : 'light');
+        });
+        document.getElementById('filtroColor').addEventListener('change', function () {
+            document.documentElement.style.filter = this.value === '' ? 'none' : this.value === 'grayscale' ? 'grayscale(1)' : 'url(#' + this.value + ')';
+        });
+        document.getElementById('narradorActivado').addEventListener('change', function () {
+            if (this.checked) speechSynthesis.speak(new SpeechSynthesisUtterance('Narrador activado. Bienvenido a AQUAX.'));
+            else speechSynthesis.cancel();
+        });
+
+        if (document.getElementById('modoOscuro').checked) document.documentElement.setAttribute('data-bs-theme', 'dark');
+        if (document.getElementById('nivelZoom').value != '100') document.body.style.zoom = document.getElementById('nivelZoom').value + '%';
+    </script>
+}
